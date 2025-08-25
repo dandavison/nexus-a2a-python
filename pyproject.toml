@@ -7,7 +7,11 @@ authors = [
     { name = "Dan Davison", email = "dan.davison@temporal.io" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "a2a-sdk>=0.3.3",
+    "litellm>=1.76.0",
+    "temporalio>=1.16.0",
+]
 
 [build-system]
 requires = ["hatchling"]
