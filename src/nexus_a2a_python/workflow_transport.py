@@ -1,3 +1,4 @@
+import pprint
 from collections.abc import AsyncGenerator
 
 from a2a.client import ClientConfig
@@ -5,12 +6,9 @@ from a2a.client.middleware import ClientCallContext, ClientCallInterceptor
 from a2a.client.transports.base import ClientTransport
 from a2a.types import (
     AgentCard,
-    DataPart,
     GetTaskPushNotificationConfigParams,
     Message,
     MessageSendParams,
-    Part,
-    Role,
     Task,
     TaskArtifactUpdateEvent,
     TaskIdParams,
@@ -41,18 +39,17 @@ class WorkflowNexusTransport(ClientTransport):
         context: ClientCallContext | None = None,
     ) -> Task | Message:
         """Sends a non-streaming message request to the agent."""
-
-        assert len(request.message.parts) == 1
-        [part] = request.message.parts
-        assert isinstance(part.root, DataPart)
-        message_data = part.root.data
-
+        print(
+            f"🌈 WorkflowNexusTransport.send_message(request={pprint.pformat(request.model_dump())})"
+        )
+        assert request.message.metadata
         nexus_client = workflow.create_nexus_client(
             endpoint=self.endpoint,
-            service=message_data["service"],
+            service=request.message.metadata["service"],
         )
         nexus_op = await nexus_client.start_operation(
-            message_data["operation"], message_data["input"]
+            request.message.metadata["operation"],
+            request.message,
         )
         if nexus_op.operation_token:
             return Task(
@@ -65,12 +62,7 @@ class WorkflowNexusTransport(ClientTransport):
                 ),
             )
         else:
-            result = await nexus_op
-            return Message(
-                message_id="TODO",
-                parts=[Part(root=DataPart(data=result))],
-                role=Role.agent,
-            )
+            return await nexus_op
 
     async def send_message_streaming(
         self,

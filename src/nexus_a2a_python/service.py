@@ -1,3 +1,11 @@
+import pprint
+
+from a2a.types import (
+    DataPart,
+    Message,
+    Part,
+    Role,
+)
 from nexusrpc import Operation, service
 from nexusrpc.handler import StartOperationContext, service_handler, sync_operation
 from pydantic import BaseModel
@@ -11,20 +19,31 @@ class MyInput(BaseModel):
     name: str
 
 
-class MyOutput(BaseModel):
-    message: str
-
-
 @service(name="test-service")
 class TestService:
-    greet: Operation[MyInput, MyOutput]
+    greet: Operation[Message, Message]
 
 
 @service_handler(service=TestService)
 class TestServiceHandler:
     @sync_operation
-    async def greet(self, ctx: StartOperationContext, input: MyInput) -> MyOutput:
+    async def greet(self, ctx: StartOperationContext, message: Message) -> Message:
         """
         This is a test operation.
         """
-        return MyOutput(message=f"Hello, {input.name}")
+        print(
+            f"🌈 TestServiceHandler.greet(message={pprint.pformat(message.model_dump())})"
+        )
+        assert len(message.parts) == 1
+        [part] = message.parts
+        assert isinstance(part.root, DataPart)
+
+        return Message(
+            message_id="TODO",
+            parts=[
+                Part(
+                    root=DataPart(data={"message": f"Hello, {part.root.data['name']}"})
+                )
+            ],
+            role=Role.agent,
+        )

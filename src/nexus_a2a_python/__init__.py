@@ -1,4 +1,5 @@
 import asyncio
+import pprint
 import uuid
 from dataclasses import dataclass
 
@@ -38,7 +39,7 @@ class MCPCallerWorkflowInput:
 class MCPCallerWorkflow:
     @workflow.run
     async def run(self, input: MCPCallerWorkflowInput) -> list[Message]:
-        print("🌈 MCPCallerWorkflow.run")
+        print(f"🌈 MCPCallerWorkflow.run(input={pprint.pformat(input)})")
 
         transport_name = "temporal-workflow-nexus-transport"
         config = ClientConfig(supported_transports=[transport_name])
@@ -47,26 +48,16 @@ class MCPCallerWorkflow:
         card = minimal_agent_card(NEXUS_ENDPOINT_NAME, [transport_name])
         client = factory.create(card)
 
-        messages = []
-        async for message in client.send_message(
-            Message(
-                message_id=str(uuid.uuid4()),
-                parts=[
-                    Part(
-                        root=DataPart(
-                            data={
-                                "service": "test-service",
-                                "operation": "greet",
-                                "input": {"name": "World"},
-                            }
-                        )
-                    )
-                ],
-                role=Role.user,
-            )
-        ):
-            messages.append(message)
-        return messages
+        request_message = Message(
+            message_id=str(uuid.uuid4()),
+            parts=[Part(root=DataPart(data={"name": "World"}))],
+            role=Role.user,
+            metadata={"service": "test-service", "operation": "greet"},
+        )
+        response_messages = []
+        async for message in client.send_message(request_message):
+            response_messages.append(message)
+        return response_messages
 
 
 async def main() -> None:
