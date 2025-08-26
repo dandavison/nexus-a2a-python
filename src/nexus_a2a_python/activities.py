@@ -19,10 +19,11 @@ async def llm(prompt: str) -> str:
     response = cast(
         ModelResponse,
         await acompletion(
-            model="anthropic/claude-3-5-sonnet-20240620",
+            model="ollama/gpt-oss",  # "anthropic/claude-3-5-sonnet-20240620",
             messages=[
                 {"role": "user", "content": prompt},
             ],
+            api_base="http://localhost:11434",
         ),
     )
     logger.info("LLM response: %s", response)
