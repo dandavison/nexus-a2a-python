@@ -36,7 +36,7 @@ class TestServiceHandler:
         This is a test operation.
         """
         print(
-            f"🌈 TestServiceHandler.greet(message={pprint.pformat(message.model_dump())})"
+            f"TestServiceHandler.greet(message={pprint.pformat(message.model_dump())})"
         )
         assert len(message.parts) == 1
         [part] = message.parts
@@ -56,17 +56,17 @@ class MyOutput(BaseModel):
 
 
 @dataclass
-class MCPCallerWorkflowInput:
+class A2ACallerWorkflowInput:
     endpoint: str
 
 
 # sandbox disabled due to use of ThreadLocal by sniffio
 # TODO: make this unnecessary
 @workflow.defn(sandboxed=False)
-class MCPCallerWorkflow:
+class A2ACallerWorkflow:
     @workflow.run
-    async def run(self, input: MCPCallerWorkflowInput) -> list[Message]:
-        print(f"🌈 MCPCallerWorkflow.run(input={pprint.pformat(input)})")
+    async def run(self, input: A2ACallerWorkflowInput) -> list[Message]:
+        print(f"A2ACallerWorkflow.run(input={pprint.pformat(input)})")
 
         transport_name = "temporal-workflow-nexus-transport"
         config = ClientConfig(supported_transports=[transport_name])
@@ -97,12 +97,12 @@ async def main() -> None:
     async with Worker(
         client,
         task_queue=TASK_QUEUE,
-        workflows=[MCPCallerWorkflow],
+        workflows=[A2ACallerWorkflow],
         nexus_service_handlers=[TestServiceHandler()],
     ):
         result = await client.execute_workflow(
-            MCPCallerWorkflow.run,
-            arg=MCPCallerWorkflowInput(endpoint=NEXUS_ENDPOINT_NAME),
+            A2ACallerWorkflow.run,
+            arg=A2ACallerWorkflowInput(endpoint=NEXUS_ENDPOINT_NAME),
             id=str(uuid.uuid4()),
             task_queue=TASK_QUEUE,
         )

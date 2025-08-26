@@ -40,7 +40,7 @@ class WorkflowNexusTransport(ClientTransport):
     ) -> Task | Message:
         """Sends a non-streaming message request to the agent."""
         print(
-            f"🌈 WorkflowNexusTransport.send_message(request={pprint.pformat(request.model_dump())})"
+            f"WorkflowNexusTransport.send_message(request={pprint.pformat(request.model_dump())})"
         )
         assert request.message.metadata
         nexus_client = workflow.create_nexus_client(
@@ -60,6 +60,9 @@ class WorkflowNexusTransport(ClientTransport):
                     # this state would be 'submitted'.
                     state=TaskState.working,
                 ),
+                metadata={
+                    "nexus_operation_handle": nexus_op
+                },  # TODO: HACK: how will workflow construct the operation handle?
             )
         else:
             return await nexus_op

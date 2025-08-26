@@ -19,11 +19,12 @@ async def llm(prompt: str) -> str:
     response = cast(
         ModelResponse,
         await acompletion(
-            model="ollama/gpt-oss",  # "anthropic/claude-3-5-sonnet-20240620",
+            model="ollama_chat/gpt-oss",  # Use ollama_chat prefix for chat models
             messages=[
                 {"role": "user", "content": prompt},
             ],
             api_base="http://localhost:11434",
+            timeout=30,  # Increase timeout for model loading
         ),
     )
     logger.info("LLM response: %s", response)
