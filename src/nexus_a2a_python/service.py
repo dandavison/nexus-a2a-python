@@ -3,9 +3,8 @@ import pprint
 from a2a.types import (
     DataPart,
     Message,
-    Part,
-    Role,
 )
+from a2a.utils import new_agent_text_message
 from nexusrpc import Operation, service
 from nexusrpc.handler import StartOperationContext, service_handler, sync_operation
 from pydantic import BaseModel
@@ -37,13 +36,4 @@ class TestServiceHandler:
         assert len(message.parts) == 1
         [part] = message.parts
         assert isinstance(part.root, DataPart)
-
-        return Message(
-            message_id="TODO",
-            parts=[
-                Part(
-                    root=DataPart(data={"message": f"Hello, {part.root.data['name']}"})
-                )
-            ],
-            role=Role.agent,
-        )
+        return new_agent_text_message(f"Hello, {part.root.data['name']}")

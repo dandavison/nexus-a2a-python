@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from a2a.client import ClientConfig
 from a2a.client.client_factory import ClientFactory, minimal_agent_card
-from a2a.types import DataPart, Message, Part, Role
+from a2a.types import DataPart, Message, Part, Role, TextPart
 from pydantic import BaseModel
 from temporalio import workflow
 from temporalio.client import Client
@@ -84,8 +84,8 @@ async def main() -> None:
         assert isinstance(message, Message)
         assert len(message.parts) == 1
         [part] = message.parts
-        assert isinstance(part.root, DataPart)
-        assert part.root.data == {"message": "Hello, World"}
+        assert isinstance(part.root, TextPart)
+        assert part.root.text == "Hello, World"
 
 
 if __name__ == "__main__":
