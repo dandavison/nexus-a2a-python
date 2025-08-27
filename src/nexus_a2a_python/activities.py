@@ -19,12 +19,14 @@ async def llm(prompt: str) -> str:
     response = cast(
         ModelResponse,
         await acompletion(
-            model="ollama_chat/gpt-oss",  # Use ollama_chat prefix for chat models
+            model="ollama_chat/qwen2:0.5b",  # Ultra-fast 0.5B parameter model
             messages=[
                 {"role": "user", "content": prompt},
             ],
             api_base="http://localhost:11434",
-            timeout=30,  # Increase timeout for model loading
+            timeout=10,  # Reduced timeout for faster model
+            max_tokens=50,  # Limit output for speed
+            temperature=0.1,  # Lower temperature for more deterministic output
         ),
     )
     logger.info("LLM response: %s", response)
